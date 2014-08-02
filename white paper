@@ -9,23 +9,23 @@ See LICENSE for license details
 The Bitcoin blockchain is an unprecedented tool for decentralized and
 transparent consensus, record keeping, rule enforcement and accountability.
 By applying these tools to organizations we can create organizations that are
-more transparent and democratic and less susceptable to corruption. To this end
+more transparent and democratic and less susceptible to corruption. To this end
 I propose a protocol, which I call Reorg, for creating, managing and
 interacting with organizations on a blockchain.
 
 # Parts #
 
-There are four types of things that reorgs keeps track of: individuals, groups,
+There are four types of things that Reorg keeps track of: individuals, groups,
 positions, tokens and statuses.
 
 ## Individuals ##
 
 Individuals are identified by a cryptographic key pair, or address, like in
-Bitcoin. This will usually, but not necessarily always, be controled by a single
+Bitcoin. This will usually, but not necessarily always, be controlled by a single
 natural person. 
 
 Note: "Individual" as defined here is ephemeral, like a Bitcoin address. A
-single person could control multiple Individual indentities. The term
+single person could control multiple Individual identities. The term
 "individual" is used here to distinguish it from groups (see below for more on
 groups).
 
@@ -40,7 +40,7 @@ allowing for the verification of a public key.
 
 ## Groups ##
 
-A group is like a coporation. It is an entity that consists of a collection of
+A group is like a corporation. It is an entity that consists of a collection of
 member individuals and groups. It can receive and spend tokens, take actions and
 vote in groups of which it is a part.
 
@@ -89,7 +89,7 @@ the status.
 
 The Marsupial League is a group with the following members:
 
-* The Commisioner, a position
+* The Commissioner, a position
 * The Raging Roos, a group
 * The King Koalas, a group
 * The Tasmanian Devils, a group
@@ -112,7 +112,7 @@ BobCorp_Stock has these rules:
 * 49,000 units will be divided amongst addresses that send Reorgcoin to the
 BobCorp account before a specified time.
 
-The rule for addmission to the BobCorp group is:
+The rule for admission to the BobCorp group is:
 
     identity.tokens.BobCorp_Stock > 0
 
@@ -128,7 +128,7 @@ The voting criteria for BobCorp is:
 
 Bob creates a new group BobCorp_Board.
 
-The rules for addmission to BobCorp_Board are:
+The rules for admission to BobCorp_Board are:
 
     BobCorp_Board.member_size < 12 // Bob wants to limit the board to 12 people.
     AND identity.is_individual // Bob doesn't want groups as members of the board.
