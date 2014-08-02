@@ -15,7 +15,7 @@ interacting with organizations on a blockchain.
 
 # Parts #
 
-There are four types of things that Reorg keeps track of: individuals, groups,
+There are five types of things that Reorg keeps track of: individuals, groups,
 positions, tokens and statuses.
 
 ## Individuals ##
