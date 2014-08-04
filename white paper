@@ -1,4 +1,4 @@
-Reorg whitepaper version 0.1
+Reorg whitepaper version 0.1.1
 
 Copyright (c) 2014 Amos Bairn
 
@@ -56,6 +56,10 @@ Any individual or group that has this status is a member of the group.
 determine if they can vote and how much weight their vote holds.
 * Vote type: the type of voting that will be used by this group, e.g. plurality
 voting, instant runoff, approval voting, etc.
+
+Groups vote to approve messages. A message that is voted on and passed by a
+group is considered by the protocol to be signed by the group, similar to a
+message signed by an individual's private key.
 
 ## Positions ##
 
