@@ -1,4 +1,4 @@
-Reorg whitepaper version 0.1.1
+Reorg whitepaper version 0.1.2
 
 Copyright (c) 2014 Amos Bairn
 
@@ -91,17 +91,91 @@ the status.
 
 ## Sports league ##
 
-The Marsupial League is a group with the following members:
+The Marsupial_League is a group with the following members:
 
 * The Commissioner, a position
 * The Raging Roos, a group
 * The King Koalas, a group
 * The Tasmanian Devils, a group
 
+The membership status is Marsupial_League_Team
+
 Each team has:
 
-* Coach
-* Players
+* Owner, a position
+* Coach, a position
+* Players, a group
+
+The new member rule is:
+
+    identity.is_group
+    and identity.has_position('Owner')
+    and identity.has_position('Coach')
+    and identity.has_member('Players')
+    and identity.Players.is_group
+    and identity.Players.member_size >= 9 // Must have at least 9 players
+    and Marsupial_League.Commissioner.signed(add(Marsupial_League, identity))
+
+The member removal rule is:
+
+    Marsupial_League.Commissioner.signed(remove(Marsupial_League, identity))
+
+
+### New Team ###
+
+Steve wants to start a new team. He creates these groups:
+
+Team:
+
+* Name: Bandicoots
+* Positions: Owner = Steve, Coach = Steve
+* Members: Players
+* Voting criteria: if identity.is_Owner then 1 else 0 // The owner has sole
+control over the team.
+
+Players:
+
+* Name: Bandicoots_Players
+* Members: None
+* New member rule: Owner.signed(add(Bandicoots_Players, identity))
+
+The team is not eligible for membership in the league because it doesn't have
+the required number of players.
+
+Steve goes recruiting and signs players.
+
+The commissioner doesn't like that the owner is the coach and that there is no
+rule for the removal of players. The commissioner doesn't sign off on adding the
+team.
+
+Steve finds Frank and signs a message that says
+`set_position(Bandicoots.Coach, Frank)` putting him in the coach position.
+
+Steve signs a charter change for the Bandicoots_Player group specifying that the
+remove rule is `Owner.signed(remove(Bandicoots_Players, identity))`.
+
+The commissioner approves and signs a message that says
+`add(Marsupial_League, Bandicoots, "Team")`.
+
+Steve submits a status change message to the blockchain announcing that
+Bandicoots has status Marsupial_League_Team.
+
+
+### Player Trade ###
+
+Steve and Bethany, the owner of the Tasmanian Devils, want to trade players.
+They agree to trade John, the rockstar pitcher for the Bandicoots; for Sam, the
+first baseman for the Devils. They negotiate that the Devils will pay the
+Bandicoots 300,000 Reorgcoin.
+
+Steve and Bethany both sign a message that says:
+
+    remove(Bandicoots_Players, John)
+    add(Tasmanian_Devils_Players, John)
+    remove(Tasmanian_Devils_Players, Sam)
+    add(Bandicoots_Players, Sam)
+    transfer(300000, Bandicoots, Tasmanian_Devils)
+
 
 ## Corporation ##
 
