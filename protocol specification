@@ -1,0 +1,443 @@
+Reorg protocol specification v0.1
+
+Copyright (c) 2014 Amos Bairn
+
+See LICENSE for license details
+
+
+# identity #
+
+An identity is a globally unique string identifying an individual, group, or
+position. For an individual it is an address. For a group it is the group id
+(see Group Specifications, below). For a posistion it is the position id (see
+Position Specifications, below).
+
+
+# Messages #
+
+There are a number of message types that get embedded into the blockchain.
+
+Message are of this format:
+
+    (
+        <message type>,
+        <payload>,
+        <signature>
+    )
+
+<message type> is a code signifying the type of message.
+
+<payload> is the actual message.
+
+<signature> is the signature of the message author.
+
+Message types:
+
+* charter
+* charter amendment
+* status change
+* token transfer
+* token issuance
+* initiative
+* vote
+* vote finalization
+* multimessage
+
+
+## charter ##
+
+A charter is a declaration creating new groups, tokens and/or statuses. It must
+be signed by the organizer.
+
+It has this format:
+
+    (
+        <organizer_id>,
+        <add list>
+    )
+
+<organizer_id> is the identity of the group or individual authoring this
+charter.
+
+<add list> is a list of objects to create. It has this format:
+
+    [
+        (<type>, <specifications>),
+        (<type>, <specifications>),
+        .
+        .
+        .
+    ]
+
+<type> is a code signaling the type of object being created.
+
+<specifications> is a dictionary of key, value pairs for the initial attributes
+of the object.
+
+
+## Charter Amendment ##
+
+A charter amendment modifies a charter.
+
+It has the following format:
+
+    (
+        <original charter id>,
+        <amendment index>,
+        <modify list>,
+        <add list>,
+        <remove list>
+    )
+
+<original charter id> the id of the original charter that this is amending.
+
+<amendment index> the amendment number for this charter. The first amendment
+must have index 1 and each subsequent amendment must add 1 to the index of the
+previous amendment.
+
+<modify list> is a list of objects to be modified. It has the following format:
+
+    [
+        (<object id>, <specifications>),
+        (<object id>, <specifications>),
+        .
+        .
+        .
+    ]
+
+Any keys not included in the specification leave that value of the object
+unchanged.
+
+<add list> is a list of objects to create. It has this format:
+
+    [
+        (<type>, <specifications>),
+        (<type>, <specifications>),
+        .
+        .
+        .
+    ]
+
+Objects added in an amendment have ids of the form
+`<original charter id>+':'+<amendment index>+':'+<index of object>` with
+<index of object> being the index of the object in <add list>.
+
+<remove list> is a list of objects to destroy. It has this format:
+
+    [
+        (<object id>),
+        (<object id>),
+        .
+        .
+        .
+    ]
+
+Note: The same object cannot be included in two or more of <modify list>,
+<add list>, or <remove list> in the same amendment.
+
+<object id> is the id of the object being modified or removed.
+
+<type> is a code signaling the type of object being created.
+
+<specifications> is a dictionary of key, value pairs for the attributes of the
+object.
+
+
+## Status Change ##
+
+Automatic status changes would require the whole network to assess the
+status change rules for every status and every identity every time anything
+happens. That would be prohibitively expensive.
+
+Instead interested parties (e.g. the person getting a status, members of a group
+related to the status, etc.) can privately track when a status can be changed
+and post a status change message to alert the rest of the network.
+
+A status change goes into effect when the status change message is embedded in
+the blockchain.
+
+A status change message has the following format:
+
+    (
+        <status id>,
+        <identity>,
+        <value>
+    )
+
+<status id> is the id of the status being changed.
+
+<identity> is the id of the individual or group that to which the status change
+is applied.
+
+<value> is a boolean specifying whether <identity> has the status or not. True
+means they are gaining the status. False means they are losing it.
+
+The appropriate status change rule is evaluated for <identity> to determine
+validity.
+
+
+## Token Transfer ##
+
+A token transfer is like a Bitcoin transaction.
+
+It has the form:
+
+    (
+        <Token id>,
+        <inputs>,
+        <outputs>
+    )
+
+<Token id> is the id of the token type that is being transferred.
+
+<inputs> is a list of inputs in a similar format to bitcoin inputs.
+
+<outputs> is a list of outputs in a similar format to bitcoin outputs.
+
+## Token Issuance ##
+
+A token issuance message creates new units of a token and assigns them to
+identities.
+
+It has the following format:
+
+    [
+        (<identity>, <amount>),
+        (<identity>, <amount>),
+        .
+        .
+        .
+    ]
+
+<identity> is the id of an individual, group or position.
+
+<amount> is the amount of new tokens issued and given to <identity>
+
+A token issuance message is tested against the token's issuance rules. (See
+Token Specifications below.)
+
+
+## Initiative ##
+
+An initiative is a proposal that a given message should be brought to a vote.
+
+It is of the format:
+
+    (
+        <vote type>,
+        <open time>,
+        <close time>,
+        <message>
+    )
+
+<vote type> a code specifying the voting system being used.
+
+<open time> the block number or datetime at which voting opens.
+
+<close time> the block number or datetime at which voting closes.
+
+<message> the message being voted on.
+
+The id of an initiative is the hash of the initiative.
+
+
+## Vote ##
+
+A vote message casts a vote on a given initiative.
+
+Is is of the format:
+
+    (
+        <initiative id>,
+        <version>,
+        <vote>
+    )
+
+<initiative id> the id of the initiative being voted on.
+
+<version> an integer used to change a vote, if the voting system allows it. A
+vote message with a higher <version> supercedes vote messages with lower version
+numbers on the same initiative.
+
+<vote> the value of the vote being cast. This can be a boolean for approval
+voting, a float for rating, or whatever other type is appropriate for the vote
+system being used.
+
+A vote is only valid if it gets embedded into the blockchain between the open
+time and close time.
+
+
+## multimessage ##
+
+A multimessage is a message composed of multiple messages of the other types. It
+is used to ensure that messages are accepted together or not at all.
+
+It has this format:
+
+    [
+        (<message type>, <author id>, <payload>, <signature>),
+        (<message type>, <author id>, <payload>, <signature>),
+        .
+        .
+        .
+    ]
+
+
+<message type> is a code signifying the type of message.
+
+<author id> is the identity of the individual, position or group authoring the
+single message.
+
+<payload> is a single message.
+
+<signature> is the signature of the message author. In the case of individuals
+it is a cryptographic signature. In the case of groups it is the id of an
+initiative that has closed and passed. In the case of positions it is the
+signature of the individual or group that is holding the position.
+
+In all cases what is signed is the whole multimessage with signatures removed.
+
+A multimessage is valid if and only if there is a valid signature for each
+single message, signed by the message author and signing the multimessage, less
+the signatures.
+
+
+# Specifications #
+
+Specification types:
+
+* Group
+* Token
+* Status
+* Position
+* Vote
+
+
+## Group Specifications ##
+
+Specifications for a group can have the following keys:
+
+* name: A nickname for the group. Intended to be human friendly. Does not have
+to be globally unique. Defaults to the group's id.
+
+* status_id: **REQUIRED** The id of the membership status for this group.
+
+* members: a list of identities of groups and individuals who are members
+initially.
+
+* positions: a list of position specifications for the positions that exist in
+the group.
+
+* voting_criteria: an expression that is evaluated for each member to determine
+the member's vote weight. Defaults to 1.
+
+* vote_specification: a vote specification giving the type of voting used by the
+group and the voting rules.
+
+The group id is `<charter hash>+':'+'<version index>'+':'+<index of group>`.
+To avoid hash problems, when a group is refered to in the document that is
+creating it `'charter:'+':'+'<version index>'+':'+<index of group>` is used.
+
+<charter hash> is the hash of the original charter.
+
+<version index> is the version of the charter. It is 0 for the original charter.
+For amendments it is the index of the amendment.
+
+<index of group> is the index of the group in the 'add' list of the document in
+which the group is created.
+
+
+## Token Specifications ##
+
+Specifications for a token can have the following keys:
+
+* name: A nickname for the token. Intended to be human friendly. Does not have
+to be globally unique. Defaults to the token's id.
+
+* balances: a dictionary of identity, balance pairs specifying which
+individuals and groups have tokens, and how much, at creation time.
+
+* issuances: an expression determining if new units of the token can be issued.
+creation time. The expression is evaluated againt the token issuance message.
+
+* sig_digits: number of significant digits after the decimal place. Example: a
+token with sig_digits of 5 would have 0.00001 as the smallest possible value.
+defaults to 8.
+
+The token id is `<charter hash>+':'+'<version index>'+':'+<index of token>`.
+To avoid hash problems, when a token is refered to in the document that is
+creating it `'charter:'+':'+'<version index>'+':'+<index of token>` is used.
+
+<charter hash> is the hash of the original charter.
+
+<version index> is the version of the charter. It is 0 for the original charter.
+For amendments it is the index of the amendment.
+
+<index of token> is the index of the token in the 'add' list of the document in
+which the token is created.
+
+
+## Status Specifications ##
+
+Specifications for a status can have the following keys:
+
+* name: A nickname for the status. Intended to be human friendly. Does not have
+to be globally unique. Defaults to the status's id.
+
+* identities: a list of identities individuals or groups that have the status at
+creation time.
+
+* add_rule: An expression that is evaluated for an identity to determine if that
+identity gains the status. Defaults to `False`. **Warning**: failing to specify
+this will result in a status that cannot be gained by anyone new.
+
+* remove_rule: As expression that is evalutated for an identity to determine if
+that identity losses the status. Defaults to `False`. Failing to specify this
+will result in a permenent status that cannot be lost.
+
+The status id is `<charter hash>+':'+'<version index>'+':'+<index of status>`.
+To avoid hash problems, when a status is refered to in the document that is
+creating it `'charter:'+':'+'<version index>'+':'+<index of status>` is used.
+
+<charter hash> is the hash of the original charter.
+
+<version index> is the version of the charter. It is 0 for the original charter.
+For amendments it is the index of the amendment.
+
+<index of status> is the index of the status in the 'add' list of the document in
+which the status is created.
+
+
+## Position Specification ##
+
+A dictionary that can have the following keys:
+
+* name: A nickname for the postition. Intended to be human friendly. Does not
+have to be globally unique. Defaults to the position's id.
+
+* holder: The identity of the individual or group initially holding this
+position.
+
+The position id is `<id of group>+':p:'+<index of position>`, with <index of
+position> being the index of this position specification in the group's
+positions list.
+
+Open issue: How to determine the id of a position that is added in an amendment
+to an existing group.
+
+
+## Vote Specification ##
+
+A vote specification is of the following format:
+
+    (
+        <vote type>,
+        <rules>
+    )
+
+<vote type> is a code specifying the voting system used.
+
+<rules> is an expression that is evaluated on the results of the vote and on the
+message being voted on. If it evaluates to False then the vote fails. If it
+evaluates to True then the vote passes.
+
